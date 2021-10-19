@@ -122,6 +122,18 @@ struct movie *processFile(char *filePath)
     return head;
 }
 
+//Free all memory allocated for the movie linked list
+void freeList (struct movie *head) {
+    struct movie *temp;
+
+    while(head != NULL) {
+        temp = head;
+        head = head->next;
+        free(temp->title);
+        free(temp);
+    }
+}
+
 char * getLargestFile() {
     DIR* currDir = opendir(".");
     struct dirent *aDir;
@@ -129,19 +141,28 @@ char * getLargestFile() {
     int fileSize = 0;
     char *largestFile;
     int i = 0;
+    char *saveptr, *ptr1, *ptr2, *tempStr;
 
     // Go through all the entries
     while((aDir = readdir(currDir)) != NULL){
 
         if(strncmp(PREFIX, aDir->d_name, strlen(PREFIX)) == 0){
+            tempStr = calloc(strlen(aDir->d_name) +1, sizeof(char));
+            strcpy(tempStr, aDir->d_name);
+            ptr1 = strtok_r(tempStr, ".", &saveptr);
+            ptr2 = strtok_r(NULL, ".", &saveptr);
+
             // Get meta-data for the current entry
             stat(aDir->d_name, &dirStat); 
 
-            if(dirStat.st_size > fileSize) {
+            //Only grab files that end with extension "csv"
+            if(ptr2 != NULL && strcmp(ptr2, "csv") == 0){ 
+                if(dirStat.st_size > fileSize) {
                 largestFile = calloc(strlen(aDir->d_name) + 1, sizeof(char));
                 strcpy(largestFile, aDir->d_name);
                 fileSize = dirStat.st_size;
-            }
+                }
+            } 
         }
     }
     // Close the directory
@@ -149,14 +170,27 @@ char * getLargestFile() {
     return largestFile;
 }
 
-void createDir() {
-    char nameOfDir[50];
+char * createDir() {
+    char *nameOfDir;;
     int randNum = random() % 100000;
     sprintf(nameOfDir, "gonzedua_movies_%i" ,randNum);
 
     int check = mkdir(nameOfDir, 0750);;
     if(check == -1)
         printf("\nError in creating directory.");
+    
+    return nameOfDir;
+}
+
+void createNewFiles(char *dir, struct movie *list) {
+    char * newFilePath;
+    while(list != NULL) {
+        sprintf(newFilePath, ".%s/%d.txt", dir, list->year);
+
+        list = list->next;
+    }
+
+    return;
 }
 
 //Picks an action for the program to perform depending on user choice.
@@ -187,10 +221,10 @@ void promptToProcess() {
 
     }while(option < 1 || option > 3);
 
-    //processfiles;
-    createDir();
+    struct movie *list = processFile(fileToProcess);
+    char * newDir = createDir();
     //createnewfiles
-    //deletememory
+    freeList(list);
 }
 
 // Prompt the user for what kind of information they want to see
@@ -205,18 +239,6 @@ int initialPrompt() {
     scanf("%i", &answer);
 
     return answer;
-}
-
-//Free all memory allocated for the movie linked list
-void freeList (struct movie *head) {
-    struct movie *temp;
-
-    while(head != NULL) {
-        temp = head;
-        head = head->next;
-        free(temp->title);
-        free(temp);
-    }
 }
 
 /*
