@@ -5,7 +5,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <dirent.h>
+#include <sys/stat.h>
 
+#define PREFIX "movies"
 /* struct for movie information */
 struct movie
 {
@@ -118,24 +121,37 @@ struct movie *processFile(char *filePath)
     return head;
 }
 
-// Prompt the user for what kind of information they want to see
-int initialPrompt() {
-    int answer;
+char * getLargestFile() {
+    DIR* currDir = opendir(".");
+    struct dirent *aDir;
+    struct stat dirStat;
+    int fileSize = 0;
+    char *largestFile;
+    int i = 0;
 
-    printf("\n\n1. Select a file to process\n");
-        
-    printf("\n2. Exit from the program\n");
+    // Go through all the entries
+    while((aDir = readdir(currDir)) != NULL){
 
-    printf("\nEnter a choice 1 or 2: ");
-    scanf("%i", &answer);
+        if(strncmp(PREFIX, aDir->d_name, strlen(PREFIX)) == 0){
+            // Get meta-data for the current entry
+            stat(aDir->d_name, &dirStat); 
 
-    return answer;
+            if(dirStat.st_size > fileSize) {
+                largestFile = calloc(strlen(aDir->d_name) + 1, sizeof(char));
+                strcpy(largestFile, aDir->d_name);
+                fileSize = dirStat.st_size;
+            }
+        }
+    }
+    // Close the directory
+    closedir(currDir);
+    return largestFile;
 }
 
 
 //Picks an action for the program to perform depending on user choice.
 void promptToProcess() {
-
+    char *fileToProcess;
     int option;
     do{
         printf("\n\nWhich file do you want to process?\n Enter 1 to pick the largest file\n Enter 2 to pick the smallest file\n Enter 3 to specfiy the name of a file\n");
@@ -145,7 +161,8 @@ void promptToProcess() {
 
         switch(option) {
             case 1:
-                printf("\n\nProcess largest file");
+                fileToProcess = getLargestFile();
+                printf("The largest file/directory in the current directory is %s\n", fileToProcess);
                 break;
             case 2:
                 printf("\n\nProcess smallest file");
@@ -160,6 +177,24 @@ void promptToProcess() {
 
     }while(option < 1 || option > 3);
 
+    //processfiles;
+    //createdir
+    //createnewfiles
+
+}
+
+// Prompt the user for what kind of information they want to see
+int initialPrompt() {
+    int answer;
+
+    printf("\n\n1. Select a file to process\n");
+        
+    printf("\n2. Exit from the program\n");
+
+    printf("\nEnter a choice 1 or 2: ");
+    scanf("%i", &answer);
+
+    return answer;
 }
 
 //Free all memory allocated for the movie linked list
@@ -188,6 +223,8 @@ int main()
         choice = initialPrompt();
         if(choice == 1)
             promptToProcess();
+        else if (choice == 2)
+            printf("Goodbye!");
         else
             printf("ERROR: Please choose an integer within the range of [1, 2]\n\n");
 
