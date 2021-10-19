@@ -118,116 +118,47 @@ struct movie *processFile(char *filePath)
     return head;
 }
 
-//Shows movies released in a specific year
-void showMovieByYear(struct movie *list) {
-
-    //Ask the user for the year
-    int year;
-    printf("\nEnter the year for which you want to see movies: ");
-    scanf("%i", &year);
-
-    int foundYear = 0;
-
-    while(list != NULL) {
-
-        if(list->year == year) {
-            printf("\n%s", list->title);
-            foundYear++;
-        }
-
-        list = list->next;
-    }
-
-    if(foundYear == 0)
-        printf("\nno data about movies released in %i\n", year);
-
-}
-
-//Print the highest rated movie for each year present in the file.
-void printHighestRated(struct movie *arr[121]){
-    for(int i = 0; i < 121; i++) {
-        if(arr[i] != NULL){
-            printf("\n%d, %.1f, %s", arr[i]->year, 
-                                   arr[i]->rating,
-                                   arr[i]->title);
-        }
-    }
-}
-
-//Find the highest rated movie for each year present in the file and store information of that movie in an array.
-void findHighestRated(struct movie *list) {
-    struct movie *movieArr[121] = {NULL};
-
-    while(list != NULL) {
-
-        int currYear = list->year - 1900;
-        if(movieArr[currYear] == NULL)
-            movieArr[currYear] = list;
-        else{
-            if(movieArr[currYear]->rating < list->rating)
-                movieArr[currYear] = list;
-        }
-        list = list->next;
-    }
-
-    printHighestRated(movieArr);
-}
-
-//Checks if a movie has been released in a user-specified language
-int matchLang(char movieLang[5][21], char userLang[21]) {
-    for(int i = 0; i < 5; i++) {
-        if(strcmp(movieLang[i], userLang) == 0 )
-            return 1;
-    }
-    return 0;
-}
-
-//Find and print movies that are released in a user-specified language
-void findMovieByLang(struct movie *list) {
-    char userLang[21];
-    printf("\nEnter the language for which you want to see movies: ");
-    scanf("%s", userLang);
-
-    int foundMatch = 0;
-    while(list != NULL) {
-        if(matchLang(list->languages, userLang) == 1){
-            printf("\n%i, %s", list->year, list->title);
-            foundMatch++;
-        }
-        list = list->next;
-    }
-    if(foundMatch == 0)
-        printf("\nno data about movies released in %s", userLang);
-}
-
 // Prompt the user for what kind of information they want to see
-int promptUser() {
+int initialPrompt() {
     int answer;
 
-    printf("\n\n1. Show movies released in the specified year\n2. Show highest rated movie for each year\n3. Show the title and year of release of all movies in a specified language\n4. Exit from the program\n");
+    printf("\n\n1. Select a file to process\n");
         
-    printf("\nEnter a choice from 1 to 4: ");
+    printf("\n2. Exit from the program\n");
+
+    printf("\nEnter a choice 1 or 2: ");
     scanf("%i", &answer);
 
     return answer;
 }
 
-//Picks an action for the program to perform depending on user choice.
-void doChoice(int choice, struct movie *list) {
-    switch(choice) {
-        case 1:
-            showMovieByYear(list);
-            break;
-        case 2:
-            findHighestRated(list);
-            break;
-        case 3:
-            findMovieByLang(list);
-            break;
 
-        default:
-            printf("See you next time!");
-    }
+//Picks an action for the program to perform depending on user choice.
+void promptToProcess() {
+
+    int option;
+    do{
+        printf("\n\nWhich file do you want to process?\n Enter 1 to pick the largest file\n Enter 2 to pick the smallest file\n Enter 3 to specfiy the name of a file\n");
+
+        printf("\nEnter a choice from 1 to 3: ");
+        scanf("%i", &option);
+
+        switch(option) {
+            case 1:
+                printf("\n\nProcess largest file");
+                break;
+            case 2:
+                printf("\n\nProcess smallest file");
+                break;
+            case 3:
+                printf("\n\nProcess user specified file");
+                break;
+
+            default:
+                printf("ERROR: Please choose an integer within the range of [1, 3]\n\n");
+        }
+
+    }while(option < 1 || option > 3);
 
 }
 
@@ -250,26 +181,28 @@ void freeList (struct movie *head) {
 *       gcc --std=gnu99 -o movies main.c
 */
 
-int main(int argc, char *argv[])
+int main()
 {
-    if (argc < 2)
-    {
-        printf("You must provide the name of the file to process\n");
-        printf("Example usage: ./movies movies_sample_1.csv\n");
-        return EXIT_FAILURE;
-    }
-    struct movie *list = processFile(argv[1]);
-
     int choice;
     do{
-        choice = promptUser();
-        if(0 < choice && choice < 5)
-            doChoice(choice, list);
+        choice = initialPrompt();
+        if(choice == 1)
+            promptToProcess();
         else
-            printf("ERROR: Please choose an integer within the range of [1, 4]\n\n");
+            printf("ERROR: Please choose an integer within the range of [1, 2]\n\n");
 
-    }while(choice != 4);
+    }while(choice != 2);
 
-    freeList(list);
     return EXIT_SUCCESS;
 }
+
+
+
+    // if (argc < 2)
+    // {
+    //     printf("You must provide the name of the file to process\n");
+    //     printf("Example usage: ./movies movies_sample_1.csv\n");
+    //     return EXIT_FAILURE;
+    // }
+    // struct movie *list = processFile(argv[1]);
+    //freeList(list);
