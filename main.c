@@ -165,6 +165,7 @@ char * getLargestFile() {
             } 
         }
     }
+
     // Close the directory
     closedir(currDir);
     return largestFile;
@@ -186,7 +187,6 @@ void createNewFiles(char *dir, struct movie *list) {
     char * newFilePath;
     while(list != NULL) {
         sprintf(newFilePath, ".%s/%d.txt", dir, list->year);
-
         list = list->next;
     }
 
