@@ -7,6 +7,7 @@
 #include <string.h>
 #include <dirent.h>
 #include <sys/stat.h>
+#include <time.h>
 
 #define PREFIX "movies"
 /* struct for movie information */
@@ -148,6 +149,15 @@ char * getLargestFile() {
     return largestFile;
 }
 
+void createDir() {
+    char nameOfDir[50];
+    int randNum = random() % 100000;
+    sprintf(nameOfDir, "gonzedua_movies_%i" ,randNum);
+
+    int check = mkdir(nameOfDir, 0750);;
+    if(check == -1)
+        printf("\nError in creating directory.");
+}
 
 //Picks an action for the program to perform depending on user choice.
 void promptToProcess() {
@@ -178,9 +188,9 @@ void promptToProcess() {
     }while(option < 1 || option > 3);
 
     //processfiles;
-    //createdir
+    createDir();
     //createnewfiles
-
+    //deletememory
 }
 
 // Prompt the user for what kind of information they want to see
@@ -218,6 +228,7 @@ void freeList (struct movie *head) {
 
 int main()
 {
+    srandom(time(NULL));
     int choice;
     do{
         choice = initialPrompt();
