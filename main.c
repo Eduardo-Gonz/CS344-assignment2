@@ -174,7 +174,7 @@ char * getLargestFile() {
 char * createDir() {
     char *nameOfDir;
     int randNum = random() % 100000;
-    int len = sprintf(NULL, "gonzedua_movies_%i" ,randNum);
+    int len = strlen("gonzedua_movies_") + 4;
     nameOfDir = calloc(len + 1, sizeof(char));
     sprintf(nameOfDir, "gonzedua_movies_%i" ,randNum);
 
