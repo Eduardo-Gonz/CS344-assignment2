@@ -139,7 +139,7 @@ char * getLargestFile() {
     struct dirent *aDir;
     struct stat dirStat;
     int fileSize = 0;
-    char *largestFile;
+    char *largestFile = NULL;
     int i = 0;
     char *saveptr, *ptr1, *ptr2, *tempStr;
 
@@ -154,15 +154,16 @@ char * getLargestFile() {
 
             // Get meta-data for the current entry
             stat(aDir->d_name, &dirStat); 
-
+        
             //Only grab files that end with extension "csv"
-            if(ptr2 != NULL && strcmp(ptr2, "csv") == 0){ 
-                if(dirStat.st_size > fileSize) {
+            if((ptr2 != NULL && strcmp(ptr2, "csv") == 0) && dirStat.st_size > fileSize){ 
+	       if(largestFile != NULL)
+		  free(largestFile);
                 largestFile = calloc(strlen(aDir->d_name) + 1, sizeof(char));
                 strcpy(largestFile, aDir->d_name);
                 fileSize = dirStat.st_size;
-                }
             } 
+	    free(tempStr);
         }
     }
 
@@ -174,7 +175,8 @@ char * getLargestFile() {
 char * createDir() {
     char *nameOfDir;
     int randNum = random() % 100000;
-    int len = strlen("gonzedua_movies_") + 4;
+    int len = strlen("gonzedua_movies_") + 5;
+    printf("%i", len); 
     nameOfDir = calloc(len + 1, sizeof(char));
     sprintf(nameOfDir, "gonzedua_movies_%i" ,randNum);
 
@@ -186,7 +188,7 @@ char * createDir() {
 }
 
 void createNewFiles(char *dir, struct movie *list) {
-    char * newFilePath;
+    //char * newFilePath;
     while(list != NULL) {
         printf("HELLO");
         // int len = sprintf(NULL, "%s/%d", dir, list->year);
@@ -226,11 +228,11 @@ void promptToProcess() {
     }while(option < 1 || option > 3);
 
     struct movie *list = processFile(fileToProcess);
-    printf("HELLO");
     char *newDir = createDir();
-    printf("HELLO");
     createNewFiles(newDir, list);
     freeList(list);
+    free(fileToProcess);
+    free(newDir);
 }
 
 // Prompt the user for what kind of information they want to see
