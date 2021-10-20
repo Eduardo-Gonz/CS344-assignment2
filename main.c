@@ -172,11 +172,13 @@ char * getLargestFile() {
 }
 
 char * createDir() {
-    char *nameOfDir;;
+    char *nameOfDir;
     int randNum = random() % 100000;
+    int len = sprintf(NULL, "gonzedua_movies_%i" ,randNum);
+    nameOfDir = calloc(len + 1, sizeof(char));
     sprintf(nameOfDir, "gonzedua_movies_%i" ,randNum);
 
-    int check = mkdir(nameOfDir, 0750);;
+    int check = mkdir(nameOfDir, 0750);
     if(check == -1)
         printf("\nError in creating directory.");
     
@@ -186,11 +188,13 @@ char * createDir() {
 void createNewFiles(char *dir, struct movie *list) {
     char * newFilePath;
     while(list != NULL) {
-        sprintf(newFilePath, ".%s/%d.txt", dir, list->year);
+        printf("HELLO");
+        // int len = sprintf(NULL, "%s/%d", dir, list->year);
+        // newFilePath = calloc(len + 1, sizeof(char));
+        // sprintf(newFilePath, "%s/%d", dir, list->year );
+        // printf("%s", newFilePath);
         list = list->next;
     }
-
-    return;
 }
 
 //Picks an action for the program to perform depending on user choice.
@@ -222,8 +226,10 @@ void promptToProcess() {
     }while(option < 1 || option > 3);
 
     struct movie *list = processFile(fileToProcess);
-    char * newDir = createDir();
-    //createnewfiles
+    printf("HELLO");
+    char *newDir = createDir();
+    printf("HELLO");
+    createNewFiles(newDir, list);
     freeList(list);
 }
 
