@@ -118,7 +118,7 @@ struct movie *processFile(char *filePath)
         numOfMovies++;
     }
 
-    printf("processed %s and parsed data for %d movies\n\n", filePath, numOfMovies);
+    printf("Now processing the chosen file %s\n\n", filePath);
     free(currLine);
     fclose(movieFile);
     return head;
@@ -177,7 +177,7 @@ char * getLargestFile() {
 char * createDir() {
     char *nameOfDir;
     int randNum = random() % 100000;
-    int len = strlen("gonzedua_movies_") + 5;
+    int len = strlen("gonzedua.movies.") + 5;
     nameOfDir = calloc(len + 1, sizeof(char));
     sprintf(nameOfDir, "gonzedua_movies_%i" ,randNum);
 
@@ -196,6 +196,7 @@ void populateFile(char *file, char *title) {
 		printf("open() failed on \"%s\"\n", file);
 
     write(fd, title, strlen(title));
+    write(fd, "\r\n", 2);
     close(fd);
 }
 
