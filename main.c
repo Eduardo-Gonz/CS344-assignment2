@@ -8,6 +8,8 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <time.h>
+#include <unistd.h>
+#include <fcntl.h>
 
 #define PREFIX "movies"
 /* struct for movie information */
@@ -140,8 +142,7 @@ char * getLargestFile() {
     struct stat dirStat;
     int fileSize = 0;
     char *largestFile = NULL;
-    int i = 0;
-    char *saveptr, *ptr1, *ptr2, *tempStr;
+    char *saveptr, *ptr, *tempStr;
 
     // Go through all the entries
     while((aDir = readdir(currDir)) != NULL){
@@ -149,20 +150,21 @@ char * getLargestFile() {
         if(strncmp(PREFIX, aDir->d_name, strlen(PREFIX)) == 0){
             tempStr = calloc(strlen(aDir->d_name) +1, sizeof(char));
             strcpy(tempStr, aDir->d_name);
-            ptr1 = strtok_r(tempStr, ".", &saveptr);
-            ptr2 = strtok_r(NULL, ".", &saveptr);
+            ptr = strtok_r(tempStr, ".", &saveptr);
+            ptr = strtok_r(NULL, ".", &saveptr);
 
             // Get meta-data for the current entry
-            stat(aDir->d_name, &dirStat); 
+            stat(aDir->d_name, &dirStat);
         
-            //Only grab files that end with extension "csv"
-            if((ptr2 != NULL && strcmp(ptr2, "csv") == 0) && dirStat.st_size > fileSize){ 
-	       if(largestFile != NULL)
-		  free(largestFile);
-                largestFile = calloc(strlen(aDir->d_name) + 1, sizeof(char));
-                strcpy(largestFile, aDir->d_name);
-                fileSize = dirStat.st_size;
-            } 
+        //Only grab files that end with extension "csv"
+        if((ptr != NULL && !strcmp(ptr, "csv")) && dirStat.st_size > fileSize){ 
+            //free memory allocated for previous largest file
+	        if(largestFile != NULL)
+		        free(largestFile);
+            largestFile = calloc(strlen(aDir->d_name) + 1, sizeof(char));
+            strcpy(largestFile, aDir->d_name);
+            fileSize = dirStat.st_size;
+        } 
 	    free(tempStr);
         }
     }
@@ -176,7 +178,6 @@ char * createDir() {
     char *nameOfDir;
     int randNum = random() % 100000;
     int len = strlen("gonzedua_movies_") + 5;
-    printf("%i", len); 
     nameOfDir = calloc(len + 1, sizeof(char));
     sprintf(nameOfDir, "gonzedua_movies_%i" ,randNum);
 
@@ -187,16 +188,29 @@ char * createDir() {
     return nameOfDir;
 }
 
+void populateFile(char *file, char *title) {
+	int fd;
+
+    fd = open(file, O_RDWR | O_CREAT | O_APPEND, 0640);
+	if (fd == -1)
+		printf("open() failed on \"%s\"\n", file);
+
+    write(fd, title, strlen(title));
+    close(fd);
+}
+
 void createNewFiles(char *dir, struct movie *list) {
-    //char * newFilePath;
+    char * newFilePath;
     while(list != NULL) {
-        printf("HELLO");
-        // int len = sprintf(NULL, "%s/%d", dir, list->year);
-        // newFilePath = calloc(len + 1, sizeof(char));
-        // sprintf(newFilePath, "%s/%d", dir, list->year );
-        // printf("%s", newFilePath);
+        int len = strlen(dir) + 8;
+        newFilePath = calloc(len + 1, sizeof(char));
+        sprintf(newFilePath, "%s/%d.txt", dir, list->year );
+        populateFile(newFilePath, list->title);
+
         list = list->next;
     }
+
+    free(newFilePath);
 }
 
 //Picks an action for the program to perform depending on user choice.
@@ -212,7 +226,6 @@ void promptToProcess() {
         switch(option) {
             case 1:
                 fileToProcess = getLargestFile();
-                printf("The largest file/directory in the current directory is %s\n", fileToProcess);
                 break;
             case 2:
                 printf("\n\nProcess smallest file");
@@ -230,6 +243,7 @@ void promptToProcess() {
     struct movie *list = processFile(fileToProcess);
     char *newDir = createDir();
     createNewFiles(newDir, list);
+    //free any remaining memory that was allocated
     freeList(list);
     free(fileToProcess);
     free(newDir);
@@ -253,7 +267,7 @@ int initialPrompt() {
 *   Process the file provided as an argument to the program to
 *   create a linked list of movie structs and print out the list.
 *   Compile the program as follows:
-*       gcc --std=gnu99 -o movies main.c
+*       gcc --std=gnu99 -o movies_by_year main.c
 */
 
 int main()
@@ -273,14 +287,3 @@ int main()
 
     return EXIT_SUCCESS;
 }
-
-
-
-    // if (argc < 2)
-    // {
-    //     printf("You must provide the name of the file to process\n");
-    //     printf("Example usage: ./movies movies_sample_1.csv\n");
-    //     return EXIT_FAILURE;
-    // }
-    // struct movie *list = processFile(argv[1]);
-    //freeList(list);
