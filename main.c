@@ -203,15 +203,15 @@ void populateFile(char *file, char *title) {
 void createNewFiles(char *dir, struct movie *list) {
     char * newFilePath;
     while(list != NULL) {
-        int len = strlen(dir) + 8;
+        int len = strlen(dir) + 9;
         newFilePath = calloc(len + 1, sizeof(char));
         sprintf(newFilePath, "%s/%d.txt", dir, list->year );
         populateFile(newFilePath, list->title);
-
-        list = list->next;
+        free(newFilePath);
+       
+       	list = list->next;
     }
 
-    free(newFilePath);
 }
 
 //Picks an action for the program to perform depending on user choice.
