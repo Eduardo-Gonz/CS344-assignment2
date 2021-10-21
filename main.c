@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
 #include <dirent.h>
 #include <sys/stat.h>
 #include <time.h>
@@ -244,10 +245,13 @@ int fileExists(char *userFile) {
     struct dirent *aDir;
 
     while((aDir = readdir(currDir)) != NULL) {
-        if(strcmp(userFile, aDir->d_name) == 0)
-            return 1;
+        if(strcmp(userFile, aDir->d_name) == 0) {
+	   closedir(currDir); 
+	   return 1;
+	}
     }
 
+    closedir(currDir);
     return 0;
 }
 
@@ -284,8 +288,8 @@ void promptToProcess() {
             case 3:
                 fileToProcess = promptUserFile();
                 if(fileExists(fileToProcess) == 0){
-                    free(fileToProcess);
                     printf("\nThe file %s was not found. Try again.", fileToProcess);
+		    free(fileToProcess);
                     option = 0;
                 }
                 break;
