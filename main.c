@@ -139,28 +139,32 @@ void freeList (struct movie *head) {
 
 int filterFile(char *fileName) {
     char *saveptr, *ptr, *tempStr;
-
+    int bool = 0;
     if(strncmp(PREFIX, fileName, strlen(PREFIX)) == 0){
         tempStr = calloc(strlen(fileName) +1, sizeof(char));
         strcpy(tempStr, fileName);
         ptr = strtok_r(tempStr, ".", &saveptr);
         ptr = strtok_r(NULL, ".", &saveptr);
-        free(tempStr);
+
         //if file meets requirements return true
-        if(ptr!= NULL && strcmp(ptr, "csv") == 0)
-            return 1;
+        if(ptr!= NULL && strcmp(ptr, "csv") == 0) 
+            bool = 1;
+
+	free(tempStr);
     }
 
-    return 0;
+    return bool;
 }
 
-void copyFile(char *prefFile, char *dName) {
-    printf("HELLO");
+char * copyFile(char *prefFile, char *dName) {
     if(prefFile != NULL)
         free(prefFile);
     prefFile = calloc(strlen(dName) + 1, sizeof(char));
     strcpy(prefFile, dName);
+
+    return prefFile;
 }
+
 
 
 
@@ -181,15 +185,15 @@ char * getLargestFile(char fileChoice) {
         stat(aDir->d_name, &dirStat);
 
         if(fileChoice == 'L' && dirStat.st_size > fileSize){
-            copyFile(prefFile, aDir->d_name);
+            prefFile =  copyFile(prefFile, aDir->d_name);
             fileSize = dirStat.st_size;
         }
         else if(fileChoice == 'S' && dirStat.st_size < fileSize) {
-            copyFile(prefFile, aDir->d_name);
+            prefFile =  copyFile(prefFile, aDir->d_name);
             fileSize = dirStat.st_size;
         }
     }
-
+printf("\n%s\n", prefFile);
     // Close the directory
     closedir(currDir);
     return prefFile;
@@ -263,7 +267,6 @@ void promptToProcess() {
         }
 
     }while(option < 1 || option > 3);
-
     struct movie *list = processFile(fileToProcess);
     char *newDir = createDir();
     createNewFiles(newDir, list);
