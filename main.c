@@ -138,6 +138,7 @@ void freeList (struct movie *head) {
 }
 
 
+//checks if file begins with 'movies_' and has an extension of csv
 int filterFile(char *fileName) {
     char *saveptr, *ptr, *tempStr;
     int bool = 0;
@@ -157,6 +158,7 @@ int filterFile(char *fileName) {
     return bool;
 }
 
+//returns the appropriate file name of file that will be processes
 char * copyFile(char *prefFile, char *dName) {
     if(prefFile != NULL)
         free(prefFile);
@@ -166,7 +168,7 @@ char * copyFile(char *prefFile, char *dName) {
     return prefFile;
 }
 
-
+//Finds the largest/smalllest file that begins with 'movies_' and with an extension of csv that exists in current directory.
 char * getExtremaFile(char fileChoice) {
     DIR* currDir = opendir(".");
     struct dirent *aDir;
@@ -214,6 +216,7 @@ char * createDir() {
     return nameOfDir;
 }
 
+//populates newly created files with movie titles
 void populateFile(char *file, char *title) {
 	int fd;
 
@@ -226,6 +229,7 @@ void populateFile(char *file, char *title) {
     close(fd);
 }
 
+//creates new files inside of generated directory
 void createNewFiles(char *dir, struct movie *list) {
     char * newFilePath;
     while(list != NULL) {
@@ -240,6 +244,7 @@ void createNewFiles(char *dir, struct movie *list) {
 
 }
 
+//Checks if user specified file exists in current directory
 int fileExists(char *userFile) {
     DIR* currDir = opendir(".");
     struct dirent *aDir;
